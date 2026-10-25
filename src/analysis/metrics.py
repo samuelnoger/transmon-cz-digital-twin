@@ -31,6 +31,3 @@ def leakage(rho, computational_indices=(0, 1, 3, 4)):
     else:
         population = np.real(np.trace(state[np.ix_(computational_indices, computational_indices)]))
     return float(1.0 - population)
-
-
-__all__ = ["bell_fid", "fidelity", "leakage"]

@@ -165,3 +165,73 @@ def plot_absolute_cityscape(rho_matrix, title="Analog Bell State: True Physical 
     )
     
     return fig
+
+def plot_unmodeled_sweep(
+    param_values,
+    fidelities,
+    leakages,
+    *,
+    twin_fidelity=None,
+    baseline_device_fidelity=None,
+    xlabel="Unmodeled Parameter",
+    title="Sim-to-Real Gap: Impact of Unmodeled Physics",
+    invert_xaxis=False,
+):
+    """
+    Plots Bell state fidelity and qutrit leakage across a 1D sweep of an unmodeled
+    hardware effect, highlighting the divergence from the Digital Twin prediction.
+    """
+    fig, (ax_fid, ax_leak) = plt.subplots(1, 2, figsize=(11, 4.2))
+
+    # --- Panel 1: Bell Fidelity ---
+    ax_fid.plot(
+        param_values,
+        np.asarray(fidelities) * 100,
+        "o-",
+        color="teal",
+        linewidth=2,
+        label="Physical Fridge (QuTiP)",
+    )
+    if twin_fidelity is not None:
+        ax_fid.axhline(
+            twin_fidelity * 100,
+            color="royalblue",
+            linestyle="--",
+            linewidth=1.8,
+            label=f"Digital Twin Prediction ({twin_fidelity*100:.2f}%)",
+        )
+    if baseline_device_fidelity is not None:
+        ax_fid.axhline(
+            baseline_device_fidelity * 100,
+            color="gray",
+            linestyle=":",
+            linewidth=1.5,
+            label=f"Baseline Fridge ({baseline_device_fidelity*100:.2f}%)",
+        )
+    ax_fid.set_xlabel(xlabel)
+    ax_fid.set_ylabel("Bell State Fidelity (%)")
+    ax_fid.set_title(f"{title} — Fidelity")
+    ax_fid.grid(True, alpha=0.3)
+    ax_fid.legend()
+
+    # --- Panel 2: Qutrit Leakage ---
+    ax_leak.plot(
+        param_values,
+        np.asarray(leakages) * 100,
+        "s-",
+        color="crimson",
+        linewidth=2,
+        label="Out-of-Subspace Leakage",
+    )
+    ax_leak.set_xlabel(xlabel)
+    ax_leak.set_ylabel("Leakage to |2⟩ States (%)")
+    ax_leak.set_title(f"{title} — Qutrit Leakage")
+    ax_leak.grid(True, alpha=0.3)
+    ax_leak.legend()
+
+    if invert_xaxis:
+        ax_fid.invert_xaxis()
+        ax_leak.invert_xaxis()
+
+    fig.tight_layout()
+    return fig
