@@ -1,0 +1,24 @@
+name: zz1p0
+
+hardware:
+  levels: 3
+  anharmonicity_mhz: -305.2
+  coupling_mhz: 25.9
+  idle_detuning_mhz: 592.5
+  n_shots: 2000
+  zz_crosstalk_mhz: 1.0 
+
+decoherence:
+  t1_ns: 50000.0
+  t2_ns: 30000.0
+
+pulse:
+  duration_ns: 40.0
+  dt_ns: 0.1
+  max_flux_amp_ghz: 1.5
+  cutoff_freq_ghz: 1.0
+
+optimizer:
+  learning_rate: 0.01
+  steps: 500
+  leakage_weight: 0.5

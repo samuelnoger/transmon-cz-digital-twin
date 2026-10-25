@@ -5,7 +5,7 @@ from tqdm import tqdm
 from src.calibration.cz_training import calibration_loss
 
 class DigitalTwinFitter:
-    def __init__(self, dt_step, H_anharm_base, H_int_base, Hz_control, learning_rate=0.1):
+    def __init__(self, dt_step, H_anharm_base, H_int_base, Hz_control, learning_rate=0.1, steps=250):
         """
         dt_step: step size between Chevron duration checkpoints in ns (e.g., 8.0)
         """
@@ -13,7 +13,13 @@ class DigitalTwinFitter:
         self.H_anharm_base = H_anharm_base
         self.H_int_base = H_int_base
         self.Hz_control = Hz_control
-        self.optimizer = optax.adam(learning_rate)
+        self.steps = steps
+        scheduler = optax.cosine_decay_schedule(
+            init_value=learning_rate,
+            decay_steps=steps,
+            alpha=1e-4
+        )
+        self.optimizer = optax.adam(scheduler)
 
         @jax.jit
         def _step_fn(params, state, jax_amps, jax_targets_10, jax_targets_11):
@@ -36,7 +42,7 @@ class DigitalTwinFitter:
 
         self._step_fn = _step_fn
 
-    def fit(self, amplitudes_rad, target_dataset_10, target_dataset_11, init_coupling=20.0, init_detuning=600.0, init_alpha=-305.0, steps=250):
+    def fit(self, amplitudes_rad, target_dataset_10, target_dataset_11, init_coupling=20.0, init_detuning=600.0, init_alpha=-305.0):
         calib_params = {
             'coupling_mhz': jnp.array(init_coupling, dtype=jnp.float64),
             'detuning_mhz': jnp.array(init_detuning, dtype=jnp.float64),
@@ -50,7 +56,7 @@ class DigitalTwinFitter:
 
         history = {"loss": [], "coupling": [], "detuning": [], "anharmonicity": []}
 
-        for step in tqdm(range(steps), desc="Calibrating Digital Twin"):
+        for step in tqdm(range(self.steps), desc="Calibrating Digital Twin"):
             calib_params, opt_state, loss = self._step_fn(
                 calib_params, opt_state, jax_amps, jax_targets_10, jax_targets_11
             )

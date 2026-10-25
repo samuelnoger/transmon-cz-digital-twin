@@ -68,6 +68,23 @@ class HiddenDevice:
             self.c_ops.append(np.sqrt(gamma_2) * qt.tensor(num, eye))
             self.c_ops.append(np.sqrt(gamma_2) * qt.tensor(eye, num))
 
+
+    @classmethod
+    def from_config(cls, config, **overrides):
+        hw, dec = config.hardware, config.decoherence
+        kwargs = dict(
+            levels=hw.levels,
+            true_coupling=hw.coupling_mhz,
+            true_detuning=hw.idle_detuning_mhz,
+            true_anharm=hw.anharmonicity_mhz,
+            t1_ns=dec.t1_ns if dec else 0,
+            t2_ns=dec.t2_ns if dec else 0,
+            zz_crosstalk_mhz=hw.zz_crosstalk_mhz,
+            flux_bandwidth_mhz=hw.flux_bandwidth_mhz,
+        )
+        kwargs.update(overrides)
+        return cls(**kwargs)
+
     def filter_flux_waveform(self, flux_array):
         """
         Applies a causal first-order RC low-pass filter to the flux waveform

@@ -10,6 +10,8 @@ class HardwareConfig:
     coupling_mhz: Optional[float] = None
     idle_detuning_mhz: Optional[float] = None
     n_shots: Optional[int] = None
+    zz_crosstalk_mhz: float = 0.0               
+    flux_bandwidth_mhz: Optional[float] = None  
 
 @dataclass
 class DecoherenceConfig:
@@ -36,6 +38,12 @@ class ExperimentConfig:
     pulse: PulseConfig
     optimizer: OptimizerConfig
     decoherence: Optional[DecoherenceConfig] = None
+    name: str = "ideal"
+
+    def artifact_path(self, filename: str) -> Path:
+        folder = Path(__file__).parent.parent / "artifacts" / self.name
+        folder.mkdir(parents=True, exist_ok=True)
+        return folder / filename
 
     @classmethod
     def load(cls, filepath: str) -> "ExperimentConfig":
@@ -54,5 +62,6 @@ class ExperimentConfig:
             hardware=HardwareConfig(**raw['hardware']),
             pulse=PulseConfig(**raw['pulse']),
             optimizer=OptimizerConfig(**raw['optimizer']),
-            decoherence=decoherence_config
+            decoherence=decoherence_config,
+            name=raw.get("name", "ideal")
         )
