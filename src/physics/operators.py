@@ -58,3 +58,12 @@ def assemble_H0(H_anharm_base, H_int_base, Hz_control, coupling_mhz, idle_detuni
     
     H0 = H_anharm + H_int + H_detuning
     return H0
+
+def build_true_H0(config):
+    """Exact device Hamiltonian: true parameters plus the unmodeled ZZ term (JAX twin of HiddenDevice.H0)."""
+    hw = config.hardware
+    H0, Hz = build_two_qubit_operators(hw.levels, hw.anharmonicity_mhz, hw.anharmonicity_mhz,
+                                       hw.coupling_mhz, hw.idle_detuning_mhz)
+    num = jnp.diag(jnp.arange(hw.levels, dtype=float))
+    H0 = H0 + 2 * jnp.pi * (hw.zz_crosstalk_mhz / 1000.0) * jnp.kron(num, num)
+    return H0, Hz

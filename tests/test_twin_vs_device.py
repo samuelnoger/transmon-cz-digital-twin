@@ -14,6 +14,7 @@ from src.physics.operators import (
     build_two_qubit_operators,
     build_two_qubit_base,
     assemble_H0,
+    build_true_H0,
 )
 from src.physics.propagators import propagate_flux
 from src.devices.qutip_device import HiddenDevice
@@ -156,3 +157,10 @@ def test_bell_state_baseline_fidelities():
     np.testing.assert_allclose(
         leakage_device, baseline["device_leakage"], atol=baseline["leakage_atol"]
     )
+
+def test_oracle_hamiltonian_matches_device():
+    config = ExperimentConfig.load("configs/two_qubit_CZ_zz.yaml")
+    H0_true, Hz = build_true_H0(config)
+    device = HiddenDevice.from_config(config)
+    np.testing.assert_allclose(np.asarray(H0_true), device.H0.full(), atol=1e-10)
+    np.testing.assert_allclose(np.asarray(Hz), device.Hz_control.full(), atol=1e-10)
