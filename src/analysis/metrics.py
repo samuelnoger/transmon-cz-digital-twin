@@ -85,3 +85,41 @@ def bell_from_cz_block(U, n=721):
         psi = R @ (Z @ (np.asarray(U, complex) @ s))
         best = max(best, (abs(psi[0]) + abs(psi[3])) ** 2 / 2)
     return best
+
+
+def cz_process_fidelity(U_or_choi, n_grid=72):
+    """Gate fidelity of a 4x4 unitary block OR 16x16 Choi matrix against CZ, up to local Z phases.
+
+    Returns F_avg (average gate fidelity), F_pro (process fidelity), leakage and the
+    best local Z phases (p1, p2).
+    """
+    M = np.asarray(U_or_choi, dtype=complex)
+    d = 4
+
+    if M.shape == (4, 4):
+        diag = np.diag(M)
+        tr_val = float(np.real(np.trace(M.conj().T @ M)))
+        def overlap(p):
+            v = np.array([1, np.exp(1j * p[1]), np.exp(1j * p[0]), -np.exp(1j * (p[0] + p[1]))])
+            return abs(np.vdot(v, diag)) ** 2
+    elif M.shape == (16, 16):
+        diag_idx = [0, 5, 10, 15]
+        choi_diag = M[np.ix_(diag_idx, diag_idx)]
+        tr_val = float(np.real(np.trace(M)))
+        def overlap(p):
+            v = np.array([1, np.exp(1j * p[1]), np.exp(1j * p[0]), -np.exp(1j * (p[0] + p[1]))])
+            return float(np.real(v.conj() @ choi_diag @ v))
+    else:
+        raise ValueError(f"Expected shape (4, 4) or (16, 16), got {M.shape}")
+
+    grid = np.linspace(-np.pi, np.pi, n_grid, endpoint=False)
+    start = max(((overlap((a, b)), a, b) for a in grid for b in grid))[1:]
+    res = minimize(lambda p: -overlap(p), x0=start, method="Nelder-Mead",
+                   options={"xatol": 1e-10, "fatol": 1e-14})
+    ov = -res.fun
+    return {
+        "F_avg": (tr_val + ov) / (d * (d + 1)),   # Pedersen et al. 2007
+        "F_pro": ov / d**2,
+        "leakage": 1.0 - tr_val / d,
+        "p1": float(res.x[0]), "p2": float(res.x[1]),
+    }
