@@ -58,15 +58,19 @@ class HiddenDevice:
         self.Hx2, self.Hy2 = qt.tensor(eye, Hx), qt.tensor(eye, Hy)
 
         # --- Collapse Operators for Decoherence ---
+        # --- Collapse Operators for Decoherence ---
         self.c_ops = []
+        gamma_1 = 0.0
         if t1_ns > 0:
             gamma_1 = 1.0 / t1_ns
             self.c_ops.append(np.sqrt(gamma_1) * qt.tensor(b, eye))
             self.c_ops.append(np.sqrt(gamma_1) * qt.tensor(eye, b))
         if t2_ns > 0:
-            gamma_2 = 1.0 / t2_ns
-            self.c_ops.append(np.sqrt(gamma_2) * qt.tensor(num, eye))
-            self.c_ops.append(np.sqrt(gamma_2) * qt.tensor(eye, num))
+            # Claude's fix: pure dephasing rate gamma_phi required to hit the target T2
+            gamma_phi = 2.0 * (1.0 / t2_ns - gamma_1 / 2.0)
+            if gamma_phi > 0:
+                self.c_ops.append(np.sqrt(gamma_phi) * qt.tensor(num, eye))
+                self.c_ops.append(np.sqrt(gamma_phi) * qt.tensor(eye, num))
 
 
     @classmethod

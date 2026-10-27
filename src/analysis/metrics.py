@@ -1,7 +1,6 @@
 """Common state and gate quality metrics."""
 
 import numpy as np
-import numpy as np
 from scipy.optimize import minimize
 from src.physics.propagators import propagate_flux
 
@@ -35,36 +34,6 @@ def leakage(rho, computational_indices=(0, 1, 3, 4)):
         population = np.real(np.trace(state[np.ix_(computational_indices, computational_indices)]))
     return float(1.0 - population)
 
-
-def cz_process_fidelity(U_comp, n_grid=72):
-    """Gate fidelity of a 4x4 computational-subspace block against CZ, up to local Z phases.
-
-    U_comp: 4x4 block of the full unitary in the basis 00, 01, 10, 11. It may be
-    sub-unitary: population that left the qubit subspace counts as loss.
-    Returns F_avg (average gate fidelity), F_pro (process fidelity), leakage and the
-    best local Z phases (p1, p2).
-    """
-    U = np.asarray(U_comp, dtype=complex)
-    d = 4
-    diag = np.diag(U)
-
-    def overlap(p):
-        # |Tr(V^dagger U)|^2 with V = CZ * Z(p1) x Z(p2) = diag(1, e^{i p2}, e^{i p1}, -e^{i(p1+p2)})
-        v = np.array([1, np.exp(1j * p[1]), np.exp(1j * p[0]), -np.exp(1j * (p[0] + p[1]))])
-        return abs(np.vdot(v, diag)) ** 2
-
-    grid = np.linspace(-np.pi, np.pi, n_grid, endpoint=False)
-    start = max(((overlap((a, b)), a, b) for a in grid for b in grid))[1:]
-    res = minimize(lambda p: -overlap(p), x0=start, method="Nelder-Mead",
-                   options={"xatol": 1e-10, "fatol": 1e-14})
-    ov = -res.fun
-    tr_uu = float(np.real(np.trace(U.conj().T @ U)))
-    return {
-        "F_avg": (tr_uu + ov) / (d * (d + 1)),   # Pedersen et al. 2007
-        "F_pro": ov / d**2,
-        "leakage": 1.0 - tr_uu / d,
-        "p1": float(res.x[0]), "p2": float(res.x[1]),
-    }
 
 COMP_IDX = np.array([0, 1, 3, 4])
 

@@ -85,8 +85,14 @@ src/calibration/cz_training.py          CZ losses and training loops
 src/calibration/virtual_z_cal.py        Virtual-Z calibration entry point
 src/experiments/ramsey.py               Ramsey and held-out probe experiments
 src/experiments/chsh.py                 CHSH experiment
-src/experiments/sinle_qubit_check.py    QuTiP pulse verification
+src/experiments/single_qubit_check.py   QuTiP pulse verification
+src/experiments/rb.py                   RB experiment orchestration
+src/experiments/rb_cliffords.py         Single-qubit Clifford utilities
+src/experiments/rb_sequences.py         RB sequence generation
+src/control/rb_waveforms.py             RB waveform compilation
+src/calibration/rb_calibration.py       RB primitive calibration
 src/analysis/metrics.py                 Fidelity and leakage metrics
+src/analysis/rb_metrics.py              RB decay fitting
 src/analysis/plots.py                   Visualization helpers
 notebooks/                              Calibration, CZ, Bell-state, and CHSH notebooks
 tests/                                  Automated twin/device regression tests
