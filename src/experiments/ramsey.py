@@ -27,8 +27,10 @@ def evaluate_held_out_probes(
     seed=999,
 ):
     """
-    Cross-validates the Uncalibrated and Calibrated JAX twins against the QuTiP
-    HiddenDevice across random smooth flux pulses starting from |10> and |11>.
+    Cross-validates the uncalibrated and calibrated JAX twins against the QuTiP
+    HiddenDevice across random pulses from the same filtered design family used
+    during calibration. The HiddenDevice then applies its hidden hardware
+    response to that commanded pulse.
     """
     @jax.jit
     def predict_populations(H0_model, pulse_rad):
@@ -48,7 +50,9 @@ def evaluate_held_out_probes(
     for _ in range(n_test_pulses):
         rand_coeffs = rng.uniform(-2.5, -1.2, size=(basis.shape[1],))
         raw_flux = basis @ rand_coeffs
-        test_pulse_rad = np.array(apply_low_pass_filter(f_max * jnp.tanh(raw_flux / f_max), kernel))
+        test_pulse_rad = np.asarray(
+            apply_low_pass_filter(f_max * jnp.tanh(raw_flux / f_max), kernel)
+        )
 
         true_p10 = fridge.measure_populations(test_pulse_rad, rho_10, n_shots=None)
         true_p11 = fridge.measure_populations(test_pulse_rad, rho_11, n_shots=None)
@@ -100,4 +104,3 @@ def run_cz_ramsey_experiment(fridge, flux_pulse_rad, opt_phases, n_phase_pts=41,
             probs_q1_in_1.append(rng.binomial(n_shots, p1_exact) / float(n_shots))
 
     return phases_sweep, np.array(probs_q1_in_0), np.array(probs_q1_in_1)
-
