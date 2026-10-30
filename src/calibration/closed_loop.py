@@ -67,13 +67,13 @@ def measure_cz_hardware_cost(
     if rng is None:
         rng = np.random.default_rng()
 
-    # 1. Leakage setting on |11> (1 setting)
+    # Leakage setting on |11> (1 setting)
     rho_11 = qt.ket2dm(qt.tensor(qt.basis(3, 1), qt.basis(3, 1)))
     pops_11 = fridge.measure_populations(pulse_rad, rho_11, n_shots=n_shots, rng=rng)
     leak_11 = float(np.clip(1.0 - np.sum(pops_11), 0.0, 1.0))
     non_11_pop = float(np.clip(1.0 - pops_11[3], 0.0, 1.0))
 
-    # 2. Conditional phase via 4 quadratures: 0, pi/2, pi, 3*pi/2 (8 settings)
+    # Conditional phase via 4 quadratures: 0, pi/2, pi, 3*pi/2 (8 settings)
     p0, p1 = _run_4point_cz_ramsey(fridge, pulse_rad, n_shots=n_shots, rng=rng)
 
     c0, s0 = p0[0] - p0[2], p0[1] - p0[3]
@@ -84,8 +84,6 @@ def measure_cz_hardware_cost(
     cond_phase = float((eta_1 - eta_0) % (2.0 * np.pi))
     delta = cond_phase - np.pi  # phase error from pi
 
-    # Fix #3: No double-counting. non_11_pop = 1 - P(|11>) already includes leak_11
-    # plus any residual |20> <-> |11> incomplete swap error.
     cost = (delta ** 2) / 16.0 + 0.25 * non_11_pop
 
     return float(cost), {
@@ -118,13 +116,7 @@ def run_closed_loop_calibration(
     prior_experiments=0,
     seed=42,
 ):
-    """Tune (amp_scale, length_scale) on `fridge` with Nelder-Mead.
-    Fixes:
-      1. `selected_F_avg` tracks the oracle fidelity of `best_pulse` chosen by
-         the noisy measured cost, never peeking at the oracle.
-      2. Re-evaluates challenger vs incumbent on a tie/new-best to suppress
-         the shot-noise winner's curse.
-    """
+    """Tune (amp_scale, length_scale) on `fridge` with Nelder-Mead."""
     rng = np.random.default_rng(seed)
 
     history = {
@@ -163,9 +155,6 @@ def run_closed_loop_calibration(
         )
         probe_f_avg = float(oracle_res["F_avg"])
 
-        # Fix #1 & #2: Update best_pulse ONLY using measured hardware cost.
-        # If candidate beats best_cost and n_shots is finite, re-verify candidate once
-        # and average the two cost readings to avoid picking a pure shot-noise outlier.
         if cost < best_cost:
             if n_shots is not None and best_cost < np.inf:
                 cost_verify, info_v = measure_cz_hardware_cost(
@@ -194,7 +183,6 @@ def run_closed_loop_calibration(
         history["cond_phase_rad"].append(info["cond_phase_rad"])
         history["params"].append((amp_scale, len_scale))
 
-        # Fix #1: Trigger target ONLY when the experimenter's selected pulse >= target
         if experiments_to_target is None and selected_f_avg >= target_fidelity:
             experiments_to_target = cum_experiments
 

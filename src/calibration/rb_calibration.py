@@ -8,7 +8,7 @@ from src.physics.propagators import propagate_parallel
 
 def _modulate_iq(I_env, Q_drag, w, t_drag, frame):
     """Modulate rotating-frame (I_env, Q_drag) onto carrier w with virtual-Z angle `frame`."""
-    arg = w * t_drag + frame    # ADD frame, don't subtract it!
+    arg = w * t_drag + frame  
     I = I_env * np.cos(arg) + Q_drag * np.sin(arg)
     Q = -I_env * np.sin(arg) + Q_drag * np.cos(arg)
     return I, Q
