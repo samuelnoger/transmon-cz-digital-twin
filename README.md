@@ -42,12 +42,12 @@ The twin uses the **fitted** parameters from the calibration notebook (`cal_para
 
 ## Results
 
-**Calibration and CZ (`01_calibrate_twin.ipynb`)**
+**Calibration and CZ (`calibrate_twin.ipynb`)**
 - **Parameter recovery:** fitted $g = 25.762\text{ MHz}$ (true $25.900\text{ MHz}$), $\Delta = 592.632\text{ MHz}$ (true $592.500\text{ MHz}$), and $\alpha = -305.385\text{ MHz}$ (true $-305.200\text{ MHz}$).
 - **Generalization:** on 100 held-out random waveforms, calibration reduces mean population prediction error from $\sim 9.3\%$ (uncalibrated) to $< 0.1\%$.
 - **Open-loop CZ performance:** achieves $99.89\%$ twin fidelity ($0.09\%$ leakage) on $H_{0,\text{cal}}$, and $F_{\text{avg}} = 99.23\%$ ($F_{\text{pro}} = 99.12\%$, $0.30\%$ leakage) on the true unitary hardware oracle with cryogenic bandwidth filtering (vs. $79.72\%$ for the uncalibrated pulse).
 
-**Bell state and CHSH (`03_bell_state.ipynb`, `04_chsh.ipynb`)**
+**Bell state and CHSH (`bell_state.ipynb`, `04_chsh.ipynb`)**
 
 | Simulator | Parameters | Unmodeled Physics & Noise | $\Phi^+$ fidelity | Leakage |
 |---|---|---|---|---|
@@ -58,15 +58,15 @@ The twin uses the **fitted** parameters from the calibration notebook (`cal_para
 - Fidelity is $\langle\Phi^+\vert{}\rho_{\text{comp}}\vert{}\Phi^+\rangle$ on the unnormalized $4 \times 4$ computational block, so leakage counts directly as loss.
 - **CHSH violation:** on the perturbed fridge with calibrated Virtual-Z phases ($c_1 = -0.96\text{ rad}$, $c_2 = 0.76\text{ rad}$), the Bell state achieves $S = 2.711 \pm 0.021$ at 5,000 shots—a $34.4\sigma$ violation of the classical bound ($S = 2.0$, vs. ideal quantum maximum $2.828$), dropping to $S = 0.956 \pm 0.024$ when the tomography frame is detuned by $+\pi/2$.
 
-**Unmodeled physics sweeps (`05_unmodeled_physics.ipynb`)**
+**Unmodeled physics sweeps (`unmodeled_physics.ipynb`)**
 - **Static $ZZ$ crosstalk ($0 \to 2.5\text{ MHz}$):** primarily induces coherent phase errors during the sequence, degrading Bell fidelity while leaving qutrit leakage nearly flat ($\sim 0.5\%$).
 - **Flux-line bandwidth ($500 \to 50\text{ MHz}$):** slurs the rising/falling edges of the 40 ns flux pulse, disrupting the adiabatic $\vert{}11\rangle \leftrightarrow \vert{}20\rangle$ trajectory and driving computational leakage up to $\sim 1.8\%$.
 
-**QPT and Randomized Benchmarking (`06_benchmarks.ipynb`)**
+**QPT and Randomized Benchmarking (`benchmarks.ipynb`)**
 - **Unitary & QPT hierarchy:** Twin unitary ($F_{\text{avg}} = 99.895\%$, $F_{\text{pro}} = 99.890\%$) $\to$ Unfiltered $H_{0,\text{true}}$ oracle ($F_{\text{avg}} = 99.453\%$, $F_{\text{pro}} = 99.336\%$) $\to$ Noiseless filtered QPT ($F_{\text{avg}} = 99.240\%$, $F_{\text{pro}} = 99.127\%$) $\to$ Open-system $T_1/T_2$ QPT ($F_{\text{avg}} = 99.091\%$, $F_{\text{pro}} = 98.943\%$, decoherence penalty $\Delta F_{\text{avg}} = 0.149\%$).
 - **Interleaved RB:** 1Q Reference RB yields $p_{\text{1Q}} = 0.98554 \pm 0.00085$ ($F_{\text{avg}} = 98.915\%$), and Interleaved CZ RB yields $p_{\text{IRB}} = 0.95662 \pm 0.00405$ ($F_{\text{avg}} = 96.747\%$), isolating an open-system CZ gate fidelity of $F_{\text{avg}}(\text{CZ, RB}) = 97.800\%$ ($p_{\text{CZ}} = 0.97066$).
 
-**Closed-loop calibration (`07_closed_loop.ipynb`)**
+**Closed-loop calibration (`closed_loop.ipynb`)**
 - **Twin-seeded (Arm A):** starts at $F_{\text{avg}} = 99.23\%$ on the perturbed fridge and reaches the $F_{\text{avg}} \ge 99.5\%$ target in **10/10 seeds** with a median of **124 cumulative hardware experiments** (70 chevron + 54 closed-loop), polishing to a final median $F_{\text{avg}} = 99.60\%$.
 - **Uncalibrated guess (Arm B):** starts at $F_{\text{avg}} = 89.62\%$ ($3.15\%$ leakage) and reaches the $99.5\%$ target in **0/10 seeds** within the evaluation budget (stalling at a median $F_{\text{avg}} = 99.33\%$).
 
